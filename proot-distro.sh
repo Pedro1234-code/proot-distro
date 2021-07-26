@@ -1,4 +1,4 @@
-#!@TERMUX_PREFIX@/bin/bash
+#!/bin/bash
 ##
 ## Script for managing proot'ed Linux distribution installations in Termux.
 ##
@@ -30,10 +30,10 @@ set -e -u
 PROGRAM_NAME="proot-distro"
 
 # Where distribution plug-ins are stored.
-DISTRO_PLUGINS_DIR="@TERMUX_PREFIX@/etc/proot-distro"
+DISTRO_PLUGINS_DIR="/etc/proot-distro"
 
 # Base directory where script keeps runtime data.
-RUNTIME_DIR="@TERMUX_PREFIX@/var/lib/proot-distro"
+RUNTIME_DIR="/var/lib/proot-distro"
 
 # Where rootfs tarballs are downloaded.
 DOWNLOAD_CACHE_DIR="${RUNTIME_DIR}/dlcache"
@@ -362,8 +362,8 @@ command_install() {
 		export DEX2OATBOOTCLASSPATH=${DEX2OATBOOTCLASSPATH-}
 		export EXTERNAL_STORAGE=${EXTERNAL_STORAGE-}
 		export LANG=C.UTF-8
-		export PATH=\${PATH}:/data/data/com.termux/files/usr/bin:/system/bin:/system/xbin
-		export PREFIX=${PREFIX-/data/data/com.termux/files/usr}
+		export PATH=\${PATH}:/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin
+		export PREFIX=${PREFIX-/usr}
 		export TERM=${TERM-xterm-256color}
 		export TMPDIR=/tmp
 		export PULSE_SERVER=127.0.0.1
@@ -500,7 +500,7 @@ run_proot_cmd() {
 
 	proot \
 		$qemu_arg -L \
-		--kernel-release=5.4.0-faked \
+		--kernel-release=5.4.0 \
 		--link2symlink \
 		--kill-on-exit \
 		--rootfs="${INSTALLED_ROOTFS_DIR}/${distro_name}" \
@@ -567,7 +567,7 @@ setup_fake_proc() {
 
 	if [ ! -f "${INSTALLED_ROOTFS_DIR}/${distro_name}/proc/.version" ]; then
 		cat <<- EOF > "${INSTALLED_ROOTFS_DIR}/${distro_name}/proc/.version"
-		Linux version 5.4.0-faked (termux@androidos) (gcc version 4.9.x (Faked /proc/version by Proot-Distro) ) #1 SMP PREEMPT Fri Jul 10 00:00:00 UTC 2020
+		Linux version 5.4.0 (termux@androidos) (gcc version 4.9.x (Faked /proc/version by Proot-Distro) ) #1 SMP PREEMPT Fri Jul 10 00:00:00 UTC 2020
 		EOF
 	fi
 
@@ -1123,7 +1123,7 @@ command_login() {
 
 		# Some devices have old kernels and GNU libc refuses to work on them.
 		# Fix this behavior by reporting a fake up-to-date kernel version.
-		set -- "--kernel-release=5.4.0-faked" "$@"
+		set -- "--kernel-release=5.4.0" "$@"
 
 		# Fix lstat to prevent dpkg symlink size warnings
 		set -- "-L" "$@"
@@ -1176,14 +1176,6 @@ command_login() {
 		fi
 		set -- "--bind=${INSTALLED_ROOTFS_DIR}/${distro_name}/tmp:/dev/shm" "$@"
 
-		# When running in non-isolated mode, provide some bindings specific
-		# to Android and Termux so user can interact with host file system.
-		if ! $isolated_environment; then
-			set -- "--bind=/data/dalvik-cache" "$@"
-			set -- "--bind=/data/data/com.termux/cache" "$@"
-			set -- "--bind=/data/data/com.termux/files/home" "$@"
-			set -- "--bind=/storage" "$@"
-			set -- "--bind=/storage/self/primary:/sdcard" "$@"
 		fi
 
 		# When using QEMU, we need some host files even in isolated mode.
@@ -1203,18 +1195,8 @@ command_login() {
 			if [ -f "/property_contexts" ]; then
 				set -- "--bind=/property_contexts" "$@"
 			fi
-		fi
 
-		# Use Termux home directory if requested.
-		# Ignores --isolated.
-		if $use_termux_home; then
-			if [ "$login_user" = "root" ]; then
-				set -- "--bind=@TERMUX_HOME@:/root" "$@"
-			else
-				set -- "--bind=@TERMUX_HOME@:/home/${login_user}" "$@"
-			fi
-		fi
-
+		
 		# Bind the tmp folder from the host system to the guest system
 		# Ignores --isolated.
 		if $make_host_tmp_shared; then
@@ -1272,7 +1254,6 @@ command_login_help() {
 	msg "  ${GREEN}--isolated           ${CYAN}- Run isolated environment without access${RST}"
 	msg "                         ${CYAN}to host file system.${RST}"
 	msg
-	msg "  ${GREEN}--termux-home        ${CYAN}- Mount Termux home directory to /root.${RST}"
 	msg "                         ${CYAN}Takes priority over '${GREEN}--isolated${CYAN}' option.${RST}"
 	msg
 	msg "  ${GREEN}--shared-tmp         ${CYAN}- Mount Termux temp directory to /tmp.${RST}"
@@ -1301,13 +1282,6 @@ command_login_help() {
 	msg "${CYAN}If no '${GREEN}--isolated${CYAN}' option given, the following host directories${RST}"
 	msg "${CYAN}will be available:${RST}"
 	msg
-	msg "  ${CYAN}* ${YELLOW}/apex ${CYAN}(only Android 10+)${RST}"
-	msg "  ${CYAN}* ${YELLOW}/data/dalvik-cache${RST}"
-	msg "  ${CYAN}* ${YELLOW}/data/data/com.termux${RST}"
-	msg "  ${CYAN}* ${YELLOW}/sdcard${RST}"
-	msg "  ${CYAN}* ${YELLOW}/storage${RST}"
-	msg "  ${CYAN}* ${YELLOW}/system${RST}"
-	msg "  ${CYAN}* ${YELLOW}/vendor${RST}"
 	msg
 	msg "${CYAN}This should be enough to get Termux utilities like termux-api or${RST}"
 	msg "${CYAN}termux-open get working. If they do not work for some reason,${RST}"
