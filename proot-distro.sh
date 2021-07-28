@@ -74,21 +74,6 @@ fi
 msg() {
 	echo -e "$@" >&2
 }
-
-#############################################################################
-#
-# ANTI-ROOT FUSE
-#
-# This script should never be executed as root as can mess up the ownership,
-# and SELinux labels in $PREFIX.
-#
-if [ "$(id -u)" = "0" ]; then
-	msg
-	msg "${BRED}Error: utility '${YELLOW}${PROGRAM_NAME}${BRED}' should not be used as root.${RST}"
-	msg
-	exit 1
-fi
-
 #############################################################################
 #
 # FUNCTION TO CHECK WHETHER DISTRIBUTION IS INSTALLED
