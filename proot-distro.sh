@@ -1281,6 +1281,7 @@ command_login_help() {
 	msg
 	show_version
 	msg
+sudo chroot ${RUNTIME_DIR}/installed-rootfs/$distro_name
 }
 
 #############################################################################
