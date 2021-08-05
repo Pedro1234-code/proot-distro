@@ -1,21 +1,9 @@
-A Bash script for managing proot'ed Linux distributions in Termux.
+A Bash script for managing proot'ed Linux distributions in Linux desktops and servers.
 
-For now it supports installation of these distributions:
+Forked form termux/proot-distro
 
-* Alpine Linux
-* Arch Linux / Arch Linux ARM
-* Debian Buster
-* Fedora 33
-* Kali Nethunter (rootless)
-* Parrot OS (LTS)
-* Ubuntu (18.04 / 20.04)
+A modified version of termux/proot-distro to make it avaible on linux desktops and PCs.
 
-## Usage example
-
-Install package in Termux:
-```
-pkg install proot-distro
-```
 
 Example on how to install Ubuntu and launch shell:
 ```
