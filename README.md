@@ -1,10 +1,8 @@
-A Bash script for managing chroot'ed Linux distributions in Linux desktops and servers.
+A Bash script for managing proot'ed Linux distributions in Linux desktops and servers.
 
 Forked form termux/proot-distro
 
 A modified version of termux/proot-distro to make it avaible on linux desktops and PCs.
-
-It's named proot-distro, but his engine is chroot.
 
 Example on how to install Ubuntu and launch shell:
 ```
