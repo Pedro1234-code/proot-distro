@@ -18,7 +18,7 @@
 ## along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-PROGRAM_VERSION="1.8.0"
+PROGRAM_VERSION="1.9.0-desktop"
 
 #############################################################################
 #
@@ -27,13 +27,19 @@ PROGRAM_VERSION="1.8.0"
 
 set -e -u
 
+mkdir -p ~/.proot-distro/etc/proot-distro
+
+mkdir -p ~/.proot-distro/var/lib/proot-distro/dlcache
+
+mkdir -p ~/.proot-distro/var/lib/proot-distro/installed-rootfs
+
 PROGRAM_NAME="proot-distro"
 
 # Where distribution plug-ins are stored.
-DISTRO_PLUGINS_DIR="/etc/proot-distro"
+DISTRO_PLUGINS_DIR="~/.proot-distro/etc/proot-distro"
 
 # Base directory where script keeps runtime data.
-RUNTIME_DIR="/var/lib/proot-distro"
+RUNTIME_DIR="~/.proot-distro/var/lib/proot-distro"
 
 # Where rootfs tarballs are downloaded.
 DOWNLOAD_CACHE_DIR="${RUNTIME_DIR}/dlcache"
@@ -486,7 +492,6 @@ run_proot_cmd() {
 	proot \
 		$qemu_arg -L \
 		--kernel-release=5.4.0 \
-		--link2symlink \
 		--kill-on-exit \
 		--rootfs="${INSTALLED_ROOTFS_DIR}/${distro_name}" \
 		--root-id \
@@ -877,7 +882,7 @@ command_reset_help() {
 command_login() {
 	local isolated_environment=false
 	local use_termux_home=false
-	local no_link2symlink=false
+	local no_link2symlink=true
 	local no_sysvipc=false
 	local no_kill_on_exit=false
 	local fix_low_ports=false
@@ -1281,7 +1286,6 @@ command_login_help() {
 	msg
 	show_version
 	msg
-sudo chroot ${RUNTIME_DIR}/installed-rootfs/$distro_name
 }
 
 #############################################################################
